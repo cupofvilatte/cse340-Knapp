@@ -1,0 +1,23 @@
+{
+  "name": "cse340-Knapp",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "dependencies": {
+    "ejs": "^3.1.10",
+    "express": "^5.1.0"
+  },
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "nodemon --env-file=.env server.js",
+    "start": "node --env-file=.env server.js"
+  },
+  "keywords": [],
+  "author": "Vilate Knapp",
+  "license": "ISC",
+  "packageManager": "pnpm@10.9.0",
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  }
+}
