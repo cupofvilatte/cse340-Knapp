@@ -1,0 +1,47 @@
+<%- include('partials/header') %>
+<main>
+    <h1><%- title %></h1>
+
+    <!--
+        This block of code dynamically adjusts the layout of the products page.  It uses a
+        simple condition to switch between two display modes: "grid view" or "details view." 
+
+        Depending on the value of the "display" variable, the page will either show products
+        in a grid format with multiple items per row, or in a detailed format with one item
+        per row and more information displayed.
+    -->
+    <div class="products-container <%= display === 'grid' ? 'grid-view' : 'details-view' %>">
+        <% products.forEach(product => { %>
+            <div class="product-card">
+                <img src="<%= product.image %>" alt="<%= product.name %>" class="product-image">
+                <div class="product-info">
+                    <h2 class="product-name"><%= product.name %></h2>
+                    <p class="product-description"><%= product.description %></p>
+                    <p class="product-price">$<%= product.price.toFixed(2) %></p>
+                </div>
+            </div>
+        <% }); %>
+    </div>
+
+    <div class="view-toggle">
+        <a href="/products/grid" class="<%= display === 'grid' ? 'active' : '' %>">Grid View</a> | 
+        <a href="/products/details" class="<%= display === 'details' ? 'active' : '' %>">Details View</a>
+    </div>
+
+    <p class="timestamp">Last updated: <%= timestamp %></p>
+
+    <!--
+        Since this is a temporary example for the timestamp, we will place the CSS here.
+        In a real application, you would want to place this in your main CSS file.
+    -->
+    <style>
+        .timestamp {
+            font-size: 0.8rem;
+            color: #999;
+            text-align: center;
+            margin-top: 2rem;
+        }
+    </style>
+
+</main>
+<%- include('partials/footer') %>
