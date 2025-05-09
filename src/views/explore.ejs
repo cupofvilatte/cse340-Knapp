@@ -1,0 +1,38 @@
+<%- include('partials/header') %>
+<main>
+    <h1>Exploring <%= category %></h1>
+    <div class="explore-details">
+        <p>You selected item #<%= id %> in the <%= category %> category.</p>
+ 
+        <% if (sort !== 'default' || filter !== 'none') { %>
+            <div class="query-params">
+                <p><strong>Applied settings:</strong></p>
+                <ul>
+                    <% if (sort !== 'default') { %>
+                        <li>Sorting by: <%= sort %></li>
+                    <% } %>
+                    <% if (filter !== 'none') { %>
+                        <li>Filtering by: <%= filter %></li>
+                    <% } %>
+                </ul>
+            </div>
+        <% } %>
+    </div>
+ 
+    <div class="navigation">
+        <p>Try these other categories:</p>
+        <ul>
+            <li><a href="/explore/books/42">Books (Item #42)</a></li>
+            <li><a href="/explore/movies/7">Movies (Item #7)</a></li>
+            <li><a href="/explore/games/15">Games (Item #15)</a></li>
+        </ul>
+ 
+        <p>Try with query parameters:</p>
+        <ul>
+            <li><a href="/explore/books/42?sort=title">Books sorted by title</a></li>
+            <li><a href="/explore/movies/7?filter=action">Movies filtered by action</a></li>
+            <li><a href="/explore/games/15?sort=rating&filter=rpg">Games sorted by rating and filtered by RPG</a></li>
+        </ul>
+    </div>
+</main>
+<%- include('partials/footer') %>

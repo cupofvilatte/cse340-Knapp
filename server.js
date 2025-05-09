@@ -14,7 +14,10 @@ app.locals.NODE_ENV = NODE_ENV;
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-app.locals.year = new Date().getFullYear();
+app.use((req, res, next) => {
+    res.locals.year = new Date().getFullYear();
+    next();
+})
 
 app.use(express.static(path.join(__dirname, 'public')));
 
@@ -38,7 +41,7 @@ app.get('/about', (req, res) => {
 
 // route handler to products page
 app.get('/products', (req, res) => {
-    const title = 'Contact Page';
+    const title = 'Products Page';
     const content = `<form action="/submit" method="POST">
     <input type="text" name="name" placeholder="Name"><br>
     <input type="phone" name="phone" placeholder="Phone number"><br>
@@ -49,15 +52,29 @@ app.get('/products', (req, res) => {
     res.render('index', { title, content });
 })
 
-app.get('/test-error', (req, res, next) => {
-    try {
-        // Intentionally trigger an error
-        const nonExistentVariable = undefinedVariable;
-        res.send('This will never be reached');
-    } catch (err) {
-        // Forward the error to the global error handler
-        next(err);
-    }
+// Basic route with parameters
+app.get('/explore/:category/:id', (req, res) => {
+    // Destructure the parameters
+    const { category, id } = req.params;
+
+    // Get query parameters
+    const { sort = 'default', filter = 'none' } = req.query;
+
+    // Log the params to the console for debugging
+    console.log('Route Parameters:', req.params);
+    console.log('Query Parameters:', req.query);
+
+    // Set the title for the page
+    const title = `Exploring ${category}`;
+
+    // Render the EJS template with the parameters
+    res.render('explore', { title, category, id, sort, filter });
+});
+
+app.get('/manual-error', (req, res, next) => {
+    const err = new Error('This is a manually triggered error');
+    err.status = 500;
+    next(err); // Forward to the global error handler
 });
 
 const mode = process.env.MODE;
