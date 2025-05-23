@@ -17,7 +17,8 @@ router.get('/', async (req, res) => {
 
 // Route for viewing a category and its items
 router.get('/:category', async (req, res) => {
-    const { category, display } = req.params;
+    const { category } = req.params;
+    const { display = 'grid' } = req.query;
 
     // Use model to get category data
     const categoryData = await getCategory(category);
