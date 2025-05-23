@@ -1,37 +1,29 @@
 <%- include('partials/header') %>
 <main>
-    <h1>Exploring <%= category %></h1>
-    <div class="explore-details">
-        <p>You selected item #<%= id %> in the <%= category %> category.</p>
+    <h1><%= categoryName %></h1>
  
-        <% if (sort !== 'default' || filter !== 'none') { %>
-            <div class="query-params">
-                <p><strong>Applied settings:</strong></p>
-                <ul>
-                    <% if (sort !== 'default') { %>
-                        <li>Sorting by: <%= sort %></li>
-                    <% } %>
-                    <% if (filter !== 'none') { %>
-                        <li>Filtering by: <%= filter %></li>
-                    <% } %>
-                </ul>
-            </div>
-        <% } %>
+    <div class="category-description">
+        <p><%= categoryDescription %></p>
+    </div>
+ 
+    <div class="items-container">
+        <h2>Available Items</h2>
+        <div class="item-grid">
+            <% Object.entries(items).forEach(([itemId, item]) => { %>
+                <div class="item-card">
+                    <h3><%= item.name %></h3>
+                    <p class="price">$<%= item.price.toFixed(2) %></p>
+                </div>
+            <% }); %>
+        </div>
     </div>
  
     <div class="navigation">
-        <p>Try these other categories:</p>
+        <p>products other categories:</p>
         <ul>
-            <li><a href="/explore/books/42">Books (Item #42)</a></li>
-            <li><a href="/explore/movies/7">Movies (Item #7)</a></li>
-            <li><a href="/explore/games/15">Games (Item #15)</a></li>
-        </ul>
- 
-        <p>Try with query parameters:</p>
-        <ul>
-            <li><a href="/explore/books/42?sort=title">Books sorted by title</a></li>
-            <li><a href="/explore/movies/7?filter=action">Movies filtered by action</a></li>
-            <li><a href="/explore/games/15?sort=rating&filter=rpg">Games sorted by rating and filtered by RPG</a></li>
+            <li><a href="/products/mens">Men's Clothing</a></li>
+            <li><a href="/products/womens">Women's Clothing</a></li>
+            <li><a href="/products/accessories">Accessories</a></li>
         </ul>
     </div>
 </main>
