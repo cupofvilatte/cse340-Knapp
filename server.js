@@ -76,10 +76,25 @@ app.get('/manual-error', (req, res, next) => {
     next(err); // Forward to the global error handler
 });
 
+// 404 Error Handler
 app.use((req, res, next) => {
+    // Ignore error forwarding for expected missing assets
+    const quiet404s = [
+        '/favicon.ico',
+        '/robots.txt'
+    ];
+
+    // Also skip any paths under /.well-known/
+    const isQuiet404 = quiet404s.includes(req.path) || req.path.startsWith('/.well-known/');
+
+    if (isQuiet404) {
+        return res.status(404).send('Not Found');
+    }
+
+    // For all other routes, forward to the global error handler
     const err = new Error('Page Not Found');
     err.status = 404;
-    next(err); // Forward to the global error handler
+    next(err);
 });
 
 app.use((err, req, res, next) => {
