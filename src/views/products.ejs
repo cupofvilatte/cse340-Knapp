@@ -1,47 +1,57 @@
 <%- include('partials/header') %>
 <main>
-    <h1><%- title %></h1>
+    <h1><%= title %></h1>
 
-    <!--
-        This block of code dynamically adjusts the layout of the products page.  It uses a
-        simple condition to switch between two display modes: "grid view" or "details view." 
+    <div class="category-info">
+        <p><%= categoryData.description %></p>
+    </div>
 
-        Depending on the value of the "display" variable, the page will either show products
-        in a grid format with multiple items per row, or in a detailed format with one item
-        per row and more information displayed.
-    -->
-    <div class="products-container <%= display === 'grid' ? 'grid-view' : 'details-view' %>">
-        <% Object.entries(items).forEach(([itemId, product]) => { %>
-            <div class="product-card">
-                <img src="<%= product.image %>" alt="<%= product.name %>" class="product-image">
-                <div class="product-info">
-                    <h2 class="product-name"><a href="/products/<%= categoryId %>/<%= itemId %>"><%= product.name %></a></h2>
-                    <p class="product-description"><%= product.description %></p>
-                    <p class="product-price">$<%= product.price.toFixed(2) %></p>
-                </div>
+    <% if (hasSubcategories) { %>
+        <div class="subcategory-filters">
+            <h2>Shop by Category</h2>
+            <div class="filter-options">
+                <% subcategories.forEach((subcategory) => { %>
+                    <a href="/products/<%= subcategory.slug %>" class="filter-option">
+                        <%= subcategory.name %>
+                    </a>
+                <% }); %>
             </div>
-        <% }); %>
-    </div>
-
-    <div class="view-toggle">
-        <a href="?display=grid" class="<%= display === 'grid' ? 'active' : '' %>">Grid View</a> | 
-        <a href="?display=details" class="<%= display === 'details' ? 'active' : '' %>">Details View</a>
-    </div>
-
-    <p class="timestamp">Last updated: <%= timestamp %></p>
-
-    <!--
-        Since this is a temporary example for the timestamp, we will place the CSS here.
-        In a real application, you would want to place this in your main CSS file.
-    -->
-    <style>
-        .timestamp {
-            font-size: 0.8rem;
-            color: #999;
-            text-align: center;
-            margin-top: 2rem;
-        }
-    </style>
-
+        </div>
+    <% } %>
+ 
+    <% if (hasProducts) { %>
+        <div class="products-container <%= display === 'grid' ? 'grid-view' : 'details-view' %>">
+            <% products.forEach((product) => { %>
+                <div class="product-card">
+                    <img src="<%= product.image %>" alt="<%= product.name %>" class="product-image">
+                    <div class="product-info">
+                        <h3 class="product-name">
+                            <a href="/products/<%= categoryData.slug %>/<%= product.id %>"><%= product.name %></a>
+                        </h3>
+                        <p class="product-description"><%= product.description %></p>
+                        <p class="product-price">$<%= product.price.toFixed(2) %></p>
+                    </div>
+                </div>
+            <% }); %>
+        </div>
+ 
+        <div class="view-toggle">
+            <a href="?display=grid" class="<%= display === 'grid' ? 'active' : '' %>">Grid View</a> | 
+            <a href="?display=details" class="<%= display === 'details' ? 'active' : '' %>">Details View</a>
+        </div>
+    <% } else { %>
+        <div class="no-products">
+            <h2>Coming Soon!</h2>
+            <p>
+                We're working hard to add products to the <strong><%= categoryData.name %></strong> category. 
+                Check back soon to see our latest offerings!
+            </p>
+            <% if (hasSubcategories) { %>
+                <p>In the meantime, explore our subcategories above or <a href="/products">browse other categories</a>.</p>
+            <% } else { %>
+                <p><a href="/products">Browse other categories</a> while we add products here.</p>
+            <% } %>
+        </div>
+    <% } %>
 </main>
 <%- include('partials/footer') %>
