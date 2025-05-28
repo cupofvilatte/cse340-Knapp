@@ -9,6 +9,7 @@ import productsRoutes from './src/routes/products/index.js';
 
 // Import global middleware
 import { addGlobalData } from './src/middleware/index.js';
+import { setupDatabase, testConnection } from './src/models/setup.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -114,6 +115,13 @@ app.use((err, req, res, next) => {
 });
 
 // Start the server and listen on the specified port
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
+    try {
+        await testConnection();
+        await setupDatabase();
+    } catch (error) {
+        console.error('Database setup failed', error);
+        process.exit(1);
+    }
     console.log(`Server is running on http://127.0.0.1:${PORT}`);
 });

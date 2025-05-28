@@ -1,6 +1,14 @@
 import { Router } from 'express';
 import { getAllCategories, getCategory, getCategoryItems, getRandomProduct, getItem } from '../../models/products-data.js';
 
+import { 
+    getNavigationCategories, 
+    getCategoryBySlug, 
+    getChildCategories,
+    getProductsByCategory, 
+    getRandomNavigationCategory 
+} from '../../models/categories/index.js';
+
 const router = Router();
 
 /**
