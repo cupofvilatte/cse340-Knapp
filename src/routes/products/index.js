@@ -1,83 +1,61 @@
 import { Router } from 'express';
-import { getAllCategories, getCategory, getCategoryItems, getRandomProduct, getItem } from '../../models/products-data.js';
+import { 
+    getNavigationCategories, 
+    getCategoryBySlug, 
+    getChildCategories,
+    getProductsByCategory, 
+    getRandomNavigationCategory 
+} from '../../models/categories/index.js';
 
 const router = Router();
 
 /**
- * The products functionality is more complex, involving data fetching and
- * dynamic content, so it gets its own directory. This keeps the code
- * organized and makes it easier to maintain and expand.
+ * Route for /products - redirects to a random navigation category
+ * Now uses database to select a random parent category instead of hardcoded data
  */
+router.get('/', async (req, res, next) => {
+    const randomCategory = await getRandomNavigationCategory();
 
-// Route for /products - redirects to a random category
-router.get('/', async (req, res) => {
-    const randomProduct = await getRandomProduct();
-    res.redirect(`/products/${randomProduct.category}`);
+    if (!randomCategory) {
+        const error = new Error('No categories available');
+        error.status = 404;
+        return next(error);
+    }
+
+    res.redirect(`/products/${randomCategory.slug}`);
 });
 
-// Route for viewing a category and its items
-router.get('/:category', async (req, res) => {
-    const { category, display } = req.params;
+/**
+ * Route for viewing a category and its products/subcategories
+ * Updated to use database queries instead of static data
+ */
+router.get('/:category', async (req, res, next) => {
+    const { category } = req.params;
+    const { display = 'grid' } = req.query;
 
-    // Use model to get category data
-    const categoryData = await getCategory(category);
+    // Get category from database
+    const categoryData = await getCategoryBySlug(category);
 
     // Check if category exists
     if (!categoryData) {
-        /**
-         * If the category or item doesn't exist, create a 404 error
-         * and pass it to the error handler by throwing it. This is
-         * possible in Express 5+ because it automatically catches async
-         * errors and passes them to your registered error handler.
-         */
-        const err = new Error('Category Not Found');
-        err.status = 404;
-        throw err;
+        const error = new Error('Category Not Found');
+        error.status = 404;
+        return next(error);
     }
 
-    // Get the items in this category
-    const items = await getCategoryItems(category);
+    // Get subcategories and products for this category
+    const subcategories = await getChildCategories(categoryData.id);
+    const products = await getProductsByCategory(categoryData.id);
 
-    // Render the products template with category and items
-    res.render('products', { 
+    // Render the products template
+    res.render('products', {
         title: `Exploring ${categoryData.name}`,
         display,
-        categoryId: category,
-        categoryName: categoryData.name,
-        categoryDescription: categoryData.description,
-        items: items
-    });
-});
-
-
-router.get('/:category/:id', async (req, res) => {
-    const { category, id } = req.params;
-
-    const categoryData = await getCategory(category);
-    console.log('Category data:', categoryData);
-
-    const product = await getItem(category, id);
-    console.log('Product:', product);
-
-    // Check if category exists
-    if (!product) {
-        /**
-         * If the category or item doesn't exist, create a 404 error
-         * and pass it to the error handler by throwing it. This is
-         * possible in Express 5+ because it automatically catches async
-         * errors and passes them to your registered error handler.
-         */
-        const err = new Error('Product Not Found');
-        err.status = 404;
-        throw err;
-    }
-
-    // add render page
-    res.render('item', {
-        title: product.name,
-        product,
-        itemId: id,
-        categoryKey: category
+        categoryData,
+        subcategories,
+        products,
+        hasProducts: products.length > 0,
+        hasSubcategories: subcategories.length > 0
     });
 });
 
