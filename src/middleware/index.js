@@ -2,6 +2,9 @@ import { getNavigationCategories } from '../models/categories/index.js';
 
 // Middleware to add global data to res.locals
 export const addGlobalData = async (req, res, next) => {
+    res.locals.errors = [];
+    res.locals.messages = [];
+    
     // Get the current year for copyright notice
     res.locals.currentYear = new Date().getFullYear();
 

@@ -3,6 +3,9 @@ import express from 'express';
 import { fileURLToPath } from 'url';
 import path from 'path'; 
 
+import session from 'express-session';
+import pgSession from 'connect-pg-simple';
+
 // Import route handlers from their new locations
 import indexRoutes from './src/routes/index.js';
 import productsRoutes from './src/routes/products/index.js';
@@ -76,6 +79,27 @@ app.use((req, res, next) => {
     // Don't forget to call next() to continue to the next middleware
     next();
 });
+
+// Configure PostgreSQL session store
+const PostgresStore = pgSession(session);
+ 
+// Configure session middleware
+app.use(session({
+    store: new PostgresStore({
+        pool: db, // Use your PostgreSQL connection
+        tableName: 'sessions', // Table name for storing sessions
+        createTableIfMissing: true // Creates table if it does not exist
+    }),
+    secret: process.env.SESSION_SECRET || "default-secret-change-in-production",
+    resave: false,
+    saveUninitialized: false,
+    name: "sessionId",
+    cookie: {
+        secure: false, // Set to true in production with HTTPS
+        httpOnly: true, // Prevents client-side access to the cookie
+        maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days in milliseconds
+    }
+}));
 
 app.use(indexRoutes);
 app.use('/products', productsRoutes);
