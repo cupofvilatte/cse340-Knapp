@@ -24,6 +24,23 @@ const createCategoriesTable = `
 `;
 
 /**
+ * SQL to create the products table if it doesn't exist.
+ * 
+ * This table stores product information including name, description, price, and image URL.
+ * The id field is a serial primary key that auto-increments.
+ * All fields except id are required (NOT NULL) to ensure data integrity.
+ */
+const createProductsTable = `
+    CREATE TABLE IF NOT EXISTS products (
+        id SERIAL PRIMARY KEY,
+        name VARCHAR(255) NOT NULL,
+        description TEXT NOT NULL,
+        price DECIMAL(10,2) NOT NULL,
+        image VARCHAR(500) NOT NULL
+    );
+`;
+
+/**
  * Initial categories to populate the database.
  * Parent categories (show_in_nav: true) appear in navigation.
  * Child categories are accessible within their parent category pages.
@@ -108,6 +125,10 @@ const setupDatabase = async () => {
         // Create the categories table
         await db.query(createCategoriesTable);
         if (verbose) console.log('Categories table ready');
+
+        // Create the products table (add this after categories table creation)
+        await db.query(createProductsTable);
+        if (verbose) console.log('Products table ready');
 
         // Insert initial categories
         for (const category of initialCategories) {

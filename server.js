@@ -3,9 +3,15 @@ import express from 'express';
 import { fileURLToPath } from 'url';
 import path from 'path'; 
 
+import session from 'express-session';
+import pgSession from 'connect-pg-simple';
+
 // Import route handlers from their new locations
 import indexRoutes from './src/routes/index.js';
 import productsRoutes from './src/routes/products/index.js';
+// Add this import with your other route imports
+import dashboardRoutes from './src/routes/dashboard/index.js';
+import testRoutes from './src/routes/test.js';
 
 // Import global middleware
 import { addGlobalData } from './src/middleware/index.js';
@@ -28,6 +34,13 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.set('view engine', 'ejs');
 
 app.set('views', path.join(__dirname, 'src/views'));
+
+
+// Middleware to parse JSON data in request body
+app.use(express.json());
+
+// Middleware to parse URL-encoded form data (like from a standard HTML form)
+app.use(express.urlencoded({ extended: true }));
 
 /**
  * Middleware Functions 
@@ -67,9 +80,34 @@ app.use((req, res, next) => {
     next();
 });
 
+// Configure PostgreSQL session store
+const PostgresStore = pgSession(session);
+ 
+// Configure session middleware
+app.use(session({
+    store: new PostgresStore({
+        pool: db, // Use your PostgreSQL connection
+        tableName: 'sessions', // Table name for storing sessions
+        createTableIfMissing: true // Creates table if it does not exist
+    }),
+    secret: process.env.SESSION_SECRET || "default-secret-change-in-production",
+    resave: false,
+    saveUninitialized: false,
+    name: "sessionId",
+    cookie: {
+        secure: false, // Set to true in production with HTTPS
+        httpOnly: true, // Prevents client-side access to the cookie
+        maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days in milliseconds
+    }
+}));
+
 app.use(indexRoutes);
 app.use('/products', productsRoutes);
 
+// Add this with your other route registrations
+app.use('/dashboard', dashboardRoutes);
+
+app.use('/test', testRoutes);
 
 app.get('/manual-error', (req, res, next) => {
     const err = new Error('This is a manually triggered error');
@@ -113,6 +151,26 @@ app.use((err, req, res, next) => {
     // Render the appropriate template based on status code
     res.status(status).render(`errors/${status === 404 ? '404' : '500'}`, context);
 });
+
+// When in development mode, start a WebSocket server for live reloading
+if (NODE_ENV.includes('dev')) {
+    const ws = await import('ws');
+
+    try {
+        const wsPort = parseInt(PORT) + 1;
+        const wsServer = new ws.WebSocketServer({ port: wsPort });
+
+        wsServer.on('listening', () => {
+            console.log(`WebSocket server is running on port ${wsPort}`);
+        });
+
+        wsServer.on('error', (error) => {
+            console.error('WebSocket server error:', error);
+        });
+    } catch (error) {
+        console.error('Failed to start WebSocket server:', error);
+    }
+}
 
 // Start the server and listen on the specified port
 app.listen(PORT, async () => {
